@@ -1,0 +1,7 @@
+feedparser
+pandas
+beautifulsoup4
+scikit-learn
+sentence-transformers
+flask
+flask-cors
