@@ -3,6 +3,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from sklearn.cluster import KMeans
 from sentence_transformers import SentenceTransformer
+from datetime import datetime, timezone
 
 INPUT_FILE = "../data/news_raw.json"
 OUTPUT_FILE = "../data/processed_news.json"
@@ -49,7 +50,7 @@ def main():
     labels = kmeans.fit_predict(embeddings)
 
     # -------------------------------
-    # CREATE DATAFRAME (NO IMAGES)
+    # CREATE DATAFRAME
     # -------------------------------
     df = pd.DataFrame({
         "title": [a.get("title", "") for a in articles],
@@ -61,21 +62,29 @@ def main():
     })
 
     # -------------------------------
-    # BUILD OUTPUT JSON
+    # BUILD CLUSTERS
     # -------------------------------
-    output = []
+    clusters = []
     for cluster_id in range(N_CLUSTERS):
         cluster_articles = df[df["cluster"] == cluster_id].to_dict(orient="records")
-        output.append({
+        clusters.append({
             "group_id": int(cluster_id),
             "articles": cluster_articles
         })
 
+    # -------------------------------
+    # FINAL OUTPUT (FORCE UPDATE)
+    # -------------------------------
+    output = {
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "clusters": clusters
+    }
+
     print("[INFO] Saving processed news...")
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-        json.dump(output, f, indent=2)
+        json.dump(output, f, indent=2, ensure_ascii=False)
 
-    print("[SUCCESS] News clustering completed.")
+    print("[SUCCESS] News clustering completed at", output["generated_at_utc"])
 
 if __name__ == "__main__":
     main()
