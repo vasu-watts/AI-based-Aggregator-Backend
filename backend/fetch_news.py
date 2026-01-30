@@ -14,7 +14,7 @@ RSS_FEEDS = {
     "ASIA": "https://news.google.com/rss?hl=en-SG&gl=SG&ceid=SG:en"
 }
 
-OUTPUT_PATH = "../data/news_raw.json"
+OUTPUT_PATH = "data/news_raw.json"
 
 
 def fetch_news():
@@ -64,3 +64,4 @@ if __name__ == "__main__":
     news = fetch_news()
     save_news(news)
     print(f"[SUCCESS] Fetched {len(news)} unique articles across all regions.")
+
