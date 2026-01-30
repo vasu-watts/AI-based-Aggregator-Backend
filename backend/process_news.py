@@ -5,8 +5,8 @@ from sklearn.cluster import KMeans
 from sentence_transformers import SentenceTransformer
 from datetime import datetime, timezone
 
-INPUT_FILE = "../data/news_raw.json"
-OUTPUT_FILE = "../data/processed_news.json"
+INPUT_FILE = "data/news_raw.json"
+OUTPUT_FILE = "data/processed_news.json"
 N_CLUSTERS = 6
 
 # -------------------------------
@@ -88,3 +88,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
