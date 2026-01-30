@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 CORS(app)   # <-- This allows React frontend to fetch data from Flask
 
-PROCESSED_PATH = "../data/processed_news.json"
+PROCESSED_PATH = "data/processed_news.json"
 
 @app.route("/healthz", methods=["GET"])
 def healthz():
@@ -24,3 +24,4 @@ def get_news():
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
+
