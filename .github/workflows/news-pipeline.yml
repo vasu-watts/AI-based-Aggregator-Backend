@@ -5,10 +5,8 @@ name: AI News Pipeline
 
 on:
   schedule:
-    # Fetch RSS every 10 minutes
+    # Run every 10 minutes
     - cron: "*/10 * * * *"
-    # Run clustering every 1 hour
-    - cron: "0 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -18,6 +16,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -29,12 +29,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Fetch latest news (every 10 minutes)
+      - name: Fetch latest news
         run: |
           python backend/fetch_news.py
 
-      - name: Run AI clustering (hourly)
-        if: github.event.schedule == '0 * * * *'
+      - name: Run AI clustering
         run: |
           python backend/process_news.py
 
@@ -43,5 +42,6 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add data/
-          git commit -m "Auto-update news data" || echo "No changes to commit"
-          git push
+          git commit -m "Auto-update processed news" || echo "No changes to commit"
+          git pull --rebase origin main
+          git push origin main
