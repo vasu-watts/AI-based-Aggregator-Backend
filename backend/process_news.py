@@ -4,9 +4,16 @@ from bs4 import BeautifulSoup
 from sklearn.cluster import KMeans
 from sentence_transformers import SentenceTransformer
 from datetime import datetime, timezone
+import os
 
-INPUT_FILE = "data/news_raw.json"
-OUTPUT_FILE = "data/processed_news.json"
+# -------------------------------
+# BASE DIRECTORY (CRITICAL FIX)
+# -------------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+INPUT_FILE = os.path.join(BASE_DIR, "..", "data", "news_raw.json")
+OUTPUT_FILE = os.path.join(BASE_DIR, "..", "data", "processed_news.json")
+
 N_CLUSTERS = 6
 
 # -------------------------------
@@ -18,15 +25,18 @@ def clean_text(html):
     return BeautifulSoup(html, "html.parser").get_text(" ", strip=True)
 
 def load_articles():
+    if not os.path.exists(INPUT_FILE):
+        print("[ERROR] news_raw.json not found")
+        return []
+
     with open(INPUT_FILE, "r", encoding="utf-8") as f:
         return json.load(f).get("articles", [])
 
 def prepare_texts(articles):
-    texts = []
-    for a in articles:
-        text = f"{a.get('title','')} {clean_text(a.get('summary',''))}"
-        texts.append(text)
-    return texts
+    return [
+        f"{a.get('title','')} {clean_text(a.get('summary',''))}"
+        for a in articles
+    ]
 
 # -------------------------------
 # MAIN PROCESSING
@@ -34,19 +44,26 @@ def prepare_texts(articles):
 def main():
     print("[INFO] Loading articles...")
     articles = load_articles()
+
     if not articles:
-        print("[ERROR] No articles found")
+        print("[ERROR] No articles found, aborting clustering")
         return
+
+    print(f"[INFO] {len(articles)} articles loaded")
 
     print("[INFO] Preparing text for embeddings...")
     texts = prepare_texts(articles)
 
-    print("[INFO] Generating embeddings with Sentence-BERT...")
+    print("[INFO] Generating embeddings...")
     model = SentenceTransformer("all-MiniLM-L6-v2")
     embeddings = model.encode(texts, convert_to_numpy=True)
 
-    print("[INFO] Clustering articles with KMeans...")
-    kmeans = KMeans(n_clusters=N_CLUSTERS, random_state=42, n_init=10)
+    print("[INFO] Clustering articles...")
+    kmeans = KMeans(
+        n_clusters=N_CLUSTERS,
+        random_state=42,
+        n_init=10
+    )
     labels = kmeans.fit_predict(embeddings)
 
     # -------------------------------
@@ -73,19 +90,24 @@ def main():
         })
 
     # -------------------------------
-    # FINAL OUTPUT (FORCE UPDATE)
+    # FINAL OUTPUT
     # -------------------------------
     output = {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "total_articles": len(articles),
         "clusters": clusters
     }
+
+    os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
 
     print("[INFO] Saving processed news...")
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
 
-    print("[SUCCESS] News clustering completed at", output["generated_at_utc"])
+    print("[SUCCESS] Processed news saved at:", output["generated_at_utc"])
 
+# -------------------------------
+# ENTRY POINT
+# -------------------------------
 if __name__ == "__main__":
     main()
-
