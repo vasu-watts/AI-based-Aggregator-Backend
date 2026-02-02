@@ -4,14 +4,24 @@ import json
 import os
 
 app = Flask(__name__)
-CORS(app)   # <-- This allows React frontend to fetch data from Flask
+CORS(app)
 
-PROCESSED_PATH = "data/processed_news.json"
+# -------------------------------
+# ABSOLUTE PATH SETUP (CRITICAL)
+# -------------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROCESSED_PATH = os.path.join(BASE_DIR, "..", "data", "processed_news.json")
 
+# -------------------------------
+# HEALTH CHECK
+# -------------------------------
 @app.route("/healthz", methods=["GET"])
 def healthz():
     return "OK", 200
 
+# -------------------------------
+# NEWS API
+# -------------------------------
 @app.route("/news", methods=["GET"])
 def get_news():
     if not os.path.exists(PROCESSED_PATH):
@@ -22,6 +32,8 @@ def get_news():
 
     return jsonify(data)
 
+# -------------------------------
+# RUN SERVER
+# -------------------------------
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
-
+    app.run(host="0.0.0.0", port=5000)
