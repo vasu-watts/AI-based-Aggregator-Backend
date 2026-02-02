@@ -40,11 +40,11 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git add data/
-          git commit -m "Auto-update processed news" || echo "No changes to commit"
           git pull --rebase origin main
+          git add data/
+          git commit -m "Auto-update processed news" || echo "No changes"
           git push origin main
 
       - name: Trigger Render Redeploy
         run: |
-          curl -X POST https://api.render.com/deploy/srv-d5sd2sngi27c73dsj8j0?key=VKLQE6JMkuw
+          curl -X POST "https://api.render.com/deploy/srv-d5sd2sngi27c73dsj8j0?key=VKLQE6JMkuw"
