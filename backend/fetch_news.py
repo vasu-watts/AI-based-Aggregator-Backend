@@ -3,6 +3,12 @@ import json
 from datetime import datetime, timezone
 import os
 
+# -------------------------------
+# BASE DIRECTORY (CRITICAL)
+# -------------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_PATH = os.path.join(BASE_DIR, "..", "data", "news_raw.json")
+
 # -----------------------------------
 # REGION-WISE GOOGLE NEWS RSS FEEDS
 # -----------------------------------
@@ -14,9 +20,9 @@ RSS_FEEDS = {
     "ASIA": "https://news.google.com/rss?hl=en-SG&gl=SG&ceid=SG:en"
 }
 
-OUTPUT_PATH = "data/news_raw.json"
-
-
+# -------------------------------
+# FETCH NEWS
+# -------------------------------
 def fetch_news():
     all_articles = []
     seen_links = set()
@@ -46,7 +52,9 @@ def fetch_news():
 
     return all_articles
 
-
+# -------------------------------
+# SAVE NEWS
+# -------------------------------
 def save_news(articles):
     data = {
         "last_updated_utc": datetime.now(timezone.utc).isoformat(),
@@ -59,9 +67,10 @@ def save_news(articles):
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
-
+# -------------------------------
+# ENTRY POINT
+# -------------------------------
 if __name__ == "__main__":
     news = fetch_news()
     save_news(news)
     print(f"[SUCCESS] Fetched {len(news)} unique articles across all regions.")
-
