@@ -40,9 +40,11 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git pull --rebase origin main
+          git pull origin main --rebase
+
           git add data/
-          git commit -m "Auto-update processed news" || echo "No changes"
+          git commit -m "Auto-update processed news" || echo "No changes to commit"
+
           git push origin main
 
       - name: Trigger Render Redeploy
