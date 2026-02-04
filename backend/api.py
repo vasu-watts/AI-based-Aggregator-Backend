@@ -7,10 +7,9 @@ app = Flask(__name__)
 CORS(app)
 
 # -------------------------------
-# ABSOLUTE PATH SETUP (CRITICAL)
+# SIMPLE + SAFE PATH
 # -------------------------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PROCESSED_PATH = os.path.join(BASE_DIR, "..", "data", "processed_news.json")
+PROCESSED_PATH = "data/processed_news.json"
 
 # -------------------------------
 # HEALTH CHECK
@@ -25,12 +24,15 @@ def healthz():
 @app.route("/news", methods=["GET"])
 def get_news():
     if not os.path.exists(PROCESSED_PATH):
-        return jsonify({"error": "Processed news not found"}), 404
+        return jsonify({
+            "error": "Processed news not found",
+            "path": PROCESSED_PATH
+        }), 404
 
     with open(PROCESSED_PATH, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    return jsonify(data)
+    return jsonify(data), 200
 
 # -------------------------------
 # RUN SERVER
