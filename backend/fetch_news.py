@@ -4,10 +4,9 @@ from datetime import datetime, timezone
 import os
 
 # -------------------------------
-# BASE DIRECTORY (CRITICAL)
+# SIMPLE OUTPUT PATH (NO DRAMA)
 # -------------------------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_PATH = os.path.join(BASE_DIR, "..", "data", "news_raw.json")
+OUTPUT_PATH = "data/news_raw.json"
 
 # -----------------------------------
 # REGION-WISE GOOGLE NEWS RSS FEEDS
@@ -34,7 +33,6 @@ def fetch_news():
         for entry in feed.entries:
             link = entry.link
 
-            # Deduplicate across regions
             if link in seen_links:
                 continue
             seen_links.add(link)
@@ -42,8 +40,8 @@ def fetch_news():
             article = {
                 "title": entry.title,
                 "link": link,
-                "published": entry.published if hasattr(entry, "published") else "",
-                "summary": entry.summary if hasattr(entry, "summary") else "",
+                "published": getattr(entry, "published", ""),
+                "summary": getattr(entry, "summary", ""),
                 "source": entry.source.title if hasattr(entry, "source") else "Google News",
                 "region": region
             }
@@ -62,7 +60,7 @@ def save_news(articles):
         "articles": articles
     }
 
-    os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
+    os.makedirs("data", exist_ok=True)
 
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
