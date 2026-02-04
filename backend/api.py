@@ -10,7 +10,7 @@ CORS(app)
 # -------------------------------
 PROCESSED_NEWS_URL = (
     "https://raw.githubusercontent.com/"
-    "YOUR_USERNAME/world-brief-data/main/data/processed_news.json"
+    "vasu-watts/AI-based-Aggregator-Data/main/data/processed_news.json"
 )
 
 @app.route("/healthz", methods=["GET"])
@@ -31,3 +31,4 @@ def get_news():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
