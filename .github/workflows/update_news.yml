@@ -1,0 +1,42 @@
+name: Update World Brief News
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # every 15 minutes
+  workflow_dispatch:
+
+jobs:
+  update-news:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout backend repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements.txt
+
+      - name: Fetch raw news
+        run: |
+          python backend/fetch_news.py
+
+      - name: Process news
+        run: |
+          python backend/process_news.py
+
+      - name: Push processed data to data repo
+        run: |
+          git clone https://x-access-token:${{ secrets.DATA_REPO_TOKEN }}@github.com/vasu-watts/AI-based-Aggregator-Data.git
+          cp data/processed_news.json AI-based-Aggregator-Data/data/processed_news.json
+          cd AI-based-Aggregator-Data
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add data/processed_news.json
+          git commit -m "Auto update processed news" || echo "No changes"
+          git push
